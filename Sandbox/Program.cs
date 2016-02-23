@@ -20,7 +20,11 @@ namespace Sandbox
             // 1) REgister through the CommandModule
             //builder.RegisterAssemblyModules(typeof(CommandModule).Assembly);
             builder.RegisterModule(new AutofacCommandModule(typeof(IHandleCommand<>), AppDomain.CurrentDomain.GetAssemblies()));
-
+            builder.RegisterType<ScheduleRepository>().As<IScheduleRepository>();
+            builder.RegisterType<ApplicationHost>();
+            builder.RegisterType<CommandDispatcher>()
+                   .WithParameter(new TypedParameter(typeof(Type), typeof(IHandleCommand<>)))
+                   .As<ICommandDispatcher>();
             //    .. or
             //// 2) Register manually
             //// a) loop through assembly
@@ -48,11 +52,12 @@ namespace Sandbox
 
             using (var scope = Container.BeginLifetimeScope())
             {
-                var dispatcher = scope.Resolve<ICommandDispatcher>();
+                var dispatcher = scope.Resolve<ApplicationHost>();// scope.Resolve<ICommandDispatcher>();
                 Console.WriteLine(dispatcher);
 
                 var command = new CreateSchedule();
-                dispatcher.SendCommand(command);
+                dispatcher.Process(command);
+                //dispatcher.SendCommand(command);
             }
         }
 

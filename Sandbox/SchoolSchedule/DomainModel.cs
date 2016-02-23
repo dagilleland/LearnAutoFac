@@ -79,7 +79,10 @@ namespace I_Teach.SchoolSchedule
             var agRoot = ScheduleFactory.CreateSchedule(command);
             DomainRepository.AddSchedule(agRoot);
 
-            yield return ScheduleFactory.EventFactory.ScheduleCreated(agRoot);
+            return new object[] { ScheduleFactory.EventFactory.ScheduleCreated(agRoot) };
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // NOTE: Don't use yield return, as it can cause silent failures in execution
+            //yield return ScheduleFactory.EventFactory.ScheduleCreated(agRoot);
         }
     }
 

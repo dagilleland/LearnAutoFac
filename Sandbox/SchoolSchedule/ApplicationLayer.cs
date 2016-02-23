@@ -28,6 +28,7 @@ namespace I_Teach.SchoolSchedule
     {
         public void AddSchedule(Schedule schedule)
         {
+            Console.WriteLine(schedule);
             throw new NotImplementedException();
         }
 
@@ -62,45 +63,68 @@ namespace I_Teach.SchoolSchedule
             // TODO: Ensure that the assemblies have only one implementation per closed type...
 
             // Register the command dispatcher
-            builder.RegisterType<CommandDispatcher>().As<ICommandDispatcher>();
+            //builder.RegisterType<CommandDispatcher>(
+            //builder.RegisterType<CommandDispatcher>().WithParameter(_genericType).As<ICommandDispatcher>();
             // Register the resolver
-            builder.RegisterType<AutofacHandlerResolver>().As<IHandlerResolver>();
-        }
-    }
-    public class AutofacHandlerResolver : IHandlerResolver
-    {
-        private readonly IComponentContext _context;
-
-        public AutofacHandlerResolver(IComponentContext context)
-        {
-            _context = context;
-        }
-
-        public IHandleCommand<T> Resolve<T>() where T : class
-        {
-            T actual = _context.ResolveOptional<T>();
-            IHandleCommand<T> newVariable = actual as IHandleCommand<T>;
-            return newVariable;
+            //builder.RegisterType<AutofacHandlerResolver>().As<IHandlerResolver>();
         }
     }
     public class CommandDispatcher : ICommandDispatcher
     {
-        private readonly IHandlerResolver _resolver;
+        private readonly IComponentContext _context;
+        private readonly Type _genericType;
 
-        public CommandDispatcher(IHandlerResolver resolver)
+        public CommandDispatcher(IComponentContext context, Type genericCommandHandlerInterface)
         {
-            _resolver = resolver;
+            _context = context;
+            _genericType = genericCommandHandlerInterface;
         }
 
         public void SendCommand<TCommand>(TCommand command) where TCommand : class
         {
-            var handler = _resolver.Resolve<TCommand>();
+            var handlerType = _genericType.MakeGenericType(command.GetType());
+            dynamic handler = _context.Resolve(handlerType);
             if (handler != null)
                 handler.Handle(command);
             else
                 throw new CommandDispatchException<TCommand>(command);
         }
     }
+
+    //public class AutofacHandlerResolver : IHandlerResolver
+    //{
+    //    private readonly IComponentContext _context;
+
+    //    public AutofacHandlerResolver(IComponentContext context)
+    //    {
+    //        _context = context;
+    //    }
+
+    //    public IHandleCommand<T> Resolve<T>() where T : class
+    //    {
+    //        T actual = _context.ResolveOptional<T>();
+    //        IHandleCommand<T> newVariable = actual as IHandleCommand<T>;
+    //        return newVariable;
+    //    }
+    //}
+    //public class CommandDispatcher : ICommandDispatcher
+    //{
+    //    private readonly IHandlerResolver _resolver;
+
+    //    public CommandDispatcher(IHandlerResolver resolver)
+    //    {
+    //        _resolver = resolver;
+    //    }
+
+    //    public void SendCommand<TCommand>(TCommand command) where TCommand : class
+    //    {
+    //        var handler = _resolver.Resolve<TCommand>();
+    //        if (handler != null)
+    //            handler.Handle(command);
+    //        else
+    //            throw new CommandDispatchException<TCommand>(command);
+    //    }
+    //}
     [Serializable]
     public class CommandDispatchException<TCommand> : Exception
     {
