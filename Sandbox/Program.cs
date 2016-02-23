@@ -19,7 +19,7 @@ namespace Sandbox
             var builder = new ContainerBuilder();
             // 1) REgister through the CommandModule
             //builder.RegisterAssemblyModules(typeof(CommandModule).Assembly);
-            builder.RegisterModule(new CommandModule(typeof(IHandleCommand<>)));
+            builder.RegisterModule(new AutofacCommandModule(typeof(IHandleCommand<>), AppDomain.CurrentDomain.GetAssemblies()));
 
             //    .. or
             //// 2) Register manually

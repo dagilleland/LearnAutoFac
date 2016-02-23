@@ -16,65 +16,45 @@ using System.Threading.Tasks;
 namespace AutoFacTools
 {
     //public class CommandModule<InterfaceResolver> : Module
-    public class CommandModule : Module
-    {
-        private readonly Type _genericType;
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommandModule"/> class.
-        /// </summary>
-        /// <param name="genericType"></param>
-        public CommandModule(Type genericType)
-        {
-            //if(genericType.isg
-            _genericType = genericType;
-        }
-        protected override void Load(ContainerBuilder builder)
-        {
-            // Load the assembly containing the command handlers
-            var assembly = this.GetType().Assembly;//System.Reflection.Assembly.Load("CommandHandlers");
+    //public class CommandModule : Module
+    //{
+    //    private readonly Type _genericType;
+    //    /// <summary>
+    //    /// Initializes a new instance of the <see cref="CommandModule"/> class.
+    //    /// </summary>
+    //    /// <param name="genericType"></param>
+    //    public CommandModule(Type genericType)
+    //    {
+    //        //if(genericType.isg
+    //        _genericType = genericType;
+    //    }
+    //    protected override void Load(ContainerBuilder builder)
+    //    {
+    //        // Load the assembly containing the command handlers
+    //        var assembly = this.GetType().Assembly;//System.Reflection.Assembly.Load("CommandHandlers");
 
-            // Scan the assembly and register keyed services
-            builder.RegisterAssemblyTypes(assembly)
-                   //.As(o => o.GetInterfaces().Where(i => i.IsClosedTypeOf(typeof(IHandleCommand<>)))
-                   .As(o => o.GetInterfaces().Where(i => i.IsClosedTypeOf(_genericType))
-                                             .Select(i => new KeyedService("Handler", i)));
+    //        // Scan the assembly and register keyed services
+    //        builder.RegisterAssemblyTypes(assembly)
+    //               //.As(o => o.GetInterfaces().Where(i => i.IsClosedTypeOf(typeof(IHandleCommand<>)))
+    //               .As(o => o.GetInterfaces().Where(i => i.IsClosedTypeOf(_genericType))
+    //                                         .Select(i => new KeyedService("Handler", i)));
 
-            //// Decorate handlers with loggers
-            //builder.RegisterGenericDecorator(typeof(Logger<>),
-            //                                 typeof(IHandler<>),
-            //                                 "Handler", "Logger");
+    //        //// Decorate handlers with loggers
+    //        //builder.RegisterGenericDecorator(typeof(Logger<>),
+    //        //                                 typeof(IHandler<>),
+    //        //                                 "Handler", "Logger");
 
-            // Register the handler resolver
-            builder.RegisterType<AutofacHandlerResolver>()
-                   .As<IHandlerResolver>();
-            //builder.RegisterType<AutofacHandlerResolver>()
-            //       .As<InterfaceResolver>();
+    //        // Register the handler resolver
+    //        builder.RegisterType<AutofacHandlerResolver>()
+    //               .As<IHandlerResolver>();
+    //        //builder.RegisterType<AutofacHandlerResolver>()
+    //        //       .As<InterfaceResolver>();
 
-            // Register the command dispatcher
-            builder.RegisterType<CommandDispatcher>()
-                   .As<ICommandDispatcher>();
-        }
-    }
-    public interface IHandlerResolver
-    {
-        IHandleCommand<T> Resolve<T>() where T : class;
-    }
-    public class AutofacHandlerResolver : IHandlerResolver
-    {
-        private readonly IComponentContext _context;
-
-        public AutofacHandlerResolver(IComponentContext context)
-        {
-            _context = context;
-        }
-
-        public IHandleCommand<T> Resolve<T>() where T : class
-        {
-            T actual = _context.ResolveOptional<T>();
-            IHandleCommand<T> newVariable = actual as IHandleCommand<T>;
-            return newVariable;
-        }
-    }
+    //        // Register the command dispatcher
+    //        builder.RegisterType<CommandDispatcher>()
+    //               .As<ICommandDispatcher>();
+    //    }
+    //}
     //public class AutofacCommandDispatcher : ICommandDispatcher
     //{
     //    private readonly IComponentContext _context;
@@ -92,22 +72,4 @@ namespace AutoFacTools
     //        handler.Handle((dynamic)command);
     //    }
     //}
-    public class CommandDispatcher : ICommandDispatcher
-    {
-        private readonly IHandlerResolver _resolver;
-
-        public CommandDispatcher(IHandlerResolver resolver)
-        {
-            _resolver = resolver;
-        }
-
-        public void SendCommand<TCommand>(TCommand command) where TCommand : class
-        {
-            var handler = _resolver.Resolve<TCommand>();
-            if (handler != null)
-            {
-                handler.Handle(command);
-            }
-        }
-    }
 }
