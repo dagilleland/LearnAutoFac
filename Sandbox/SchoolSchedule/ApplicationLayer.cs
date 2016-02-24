@@ -43,6 +43,13 @@ namespace I_Teach.SchoolSchedule
             throw new NotImplementedException();
         }
     }
+    //public static class IHandlerResolverExtensions
+    //{
+    //    public static IHandleCommand<T> Resolve2<T>(this IHandlerResolver self, T cmd)
+    //    {
+    //        return null;
+    //    }
+    //}
 
     #region Autofac Modules
     public class AutofacCommandModule : Module
